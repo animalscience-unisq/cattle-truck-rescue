@@ -41,9 +41,9 @@ canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; touch-a
 
 /* ── Overlay ── */
 #overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); border-radius: inherit; z-index: 30; flex-direction: column; gap: 10px; padding: 18px; overflow-y: auto; }
-#overlay h2 { color: #fff; font-size: 17px; font-weight: 500; text-align: center; }
-#overlay .sub { color: rgba(255,255,255,0.72); font-size: 11px; text-align: center; max-width: 300px; line-height: 1.6; }
-#overlay ul { color: rgba(255,255,255,0.68); font-size: 11px; list-style: none; display: flex; flex-direction: column; gap: 3px; max-width: 270px; }
+#overlay h2 { color: #fff; font-size: 19px; font-weight: 500; text-align: center; }
+#overlay .sub { color: rgba(255,255,255,0.72); font-size: 13px; text-align: center; max-width: 300px; line-height: 1.6; }
+#overlay ul { color: rgba(255,255,255,0.68); font-size: 13px; list-style: none; display: flex; flex-direction: column; gap: 5px; max-width: 280px; }
 #overlay ul li::before { content: "— "; color: #f0c040; }
 .btn { background: #f0c040; color: #1a1a1a; border: none; border-radius: 8px; padding: 9px 22px; font-size: 13px; font-weight: 600; cursor: pointer; touch-action: manipulation; }
 .btn:active { background: #d4a820; }
@@ -161,6 +161,7 @@ const PTS_STRIKE       = -150;
 const PTS_STRESS_FRAME = -0.05;
 
 let scoreboard = [];
+let playerName = 'Handler'; // persists across all overlay rebuilds
 
 const LEVELS = [
   { name:'1 · Open road',      cattle:8,  time:90, trafficFreq:0,    trafficSpeed:0,   gateZones:false, zoneSize:130 },
@@ -663,6 +664,9 @@ function startLevel(idx) {
   clearInterval(timerInt);
   clearInterval(trafficTimer);
   animFrame=null; timerInt=null; trafficTimer=null;
+  // Always capture latest name before overlay is hidden
+  const nameEl=document.getElementById('player-name');
+  if (nameEl) playerName=nameEl.value.trim()||playerName;
 
   currentLevel=idx;
   const level=LEVELS[idx];
@@ -715,7 +719,9 @@ function endGame(won) {
 
   if (won===true && !completedLevels.includes(currentLevel)) completedLevels.push(currentLevel);
 
-  const playerName=(document.getElementById('player-name')?.value||'Handler').trim()||'Handler';
+  // Sync name from input if it's currently in the DOM, otherwise use stored value
+  const nameEl = document.getElementById('player-name');
+  if (nameEl) playerName = nameEl.value.trim() || playerName;
   scoreboard.push({ name:playerName, score:finalScore, level:level.name.split('·')[1]?.trim()||level.name, stars, date:new Date().toLocaleTimeString() });
   scoreboard.sort((a,b)=>b.score-a.score);
   if (scoreboard.length>10) scoreboard.length=10;
@@ -771,7 +777,9 @@ function buildPills2() {
 }
 function showMenu() {
   const ov=document.getElementById('overlay'); ov.style.display='flex';
-  const curName=document.getElementById('player-name')?.value||'Handler';
+  // Sync name before rebuilding overlay
+  const nameEl=document.getElementById('player-name');
+  if (nameEl) playerName=nameEl.value.trim()||playerName;
   ov.innerHTML=`
     <h2>Select a level</h2>
     <div style="display:flex;flex-direction:column;gap:7px;width:100%;max-width:290px;">
@@ -779,7 +787,7 @@ function showMenu() {
     </div>
     <div id="name-input-wrap" style="width:100%;max-width:290px;">
       <label style="font-size:10px;color:rgba(255,255,255,0.45);display:block;margin-bottom:4px;">Your name</label>
-      <input id="player-name" type="text" maxlength="18" placeholder="Handler name…" value="${curName}" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:6px 9px;color:#fff;font-size:13px;width:100%;outline:none;-webkit-appearance:none;">
+      <input id="player-name" type="text" maxlength="18" placeholder="Handler name…" value="${playerName}" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:6px 9px;color:#fff;font-size:13px;width:100%;outline:none;-webkit-appearance:none;">
     </div>
     <button class="btn-ghost" onclick="startLevel(0)">Start from level 1</button>
   `;
