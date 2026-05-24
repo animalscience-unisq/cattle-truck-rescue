@@ -280,7 +280,7 @@ function updateCattle(level) {
       score++;
       document.getElementById('sc').textContent = score;
       showMsg('+1 secured — ' + (cattle.length - score) + ' remaining');
-      if (score >= cattle.length) endGame(true);
+      if (score >= cattle.length) endGame(true); // explicit true = win
     }
   });
 
@@ -290,8 +290,38 @@ function updateCattle(level) {
 
 function updateVehicles() {
   vehicles = vehicles.filter(v => v.y > -80 && v.y < H + 80);
-  vehicles.forEach(v => { v.y += v.vy; });
+  vehicles.forEach(v => {
+    v.y += v.vy;
+
+    // Check collision with human
+    const hdx = human.x - v.x, hdy = human.y - v.y;
+    if (Math.abs(hdx) < v.w/2 + 10 && Math.abs(hdy) < v.h/2 + 10) {
+      triggerCollision('person');
+      return;
+    }
+
+    // Check collision with each unsecured cow
+    cattle.forEach(cow => {
+      if (cow.state === 'secured' || cow.hit) return;
+      const cdx = cow.x - v.x, cdy = cow.y - v.y;
+      if (Math.abs(cdx) < v.w/2 + cow.size * 0.5 && Math.abs(cdy) < v.h/2 + cow.size * 0.5) {
+        cow.hit = true;
+        triggerCollision('animal');
+      }
+    });
+  });
 }
+
+let flashTimer = 0;
+
+function triggerCollision(type) {
+  if (!gameActive) return;
+  flashTimer = 18; // frames of red flash
+  hitType = type;
+  endGame('hit');
+}
+
+let hitType = '';
 
 function updateStressUI() {
   const s = herdStress / 10;
@@ -359,6 +389,13 @@ function drawScene(level) {
   gates.forEach(g => drawGate(g));
   cattle.forEach(cow => drawCow(cow, isNight));
   drawHuman(level);
+
+  // Red impact flash
+  if (flashTimer > 0) {
+    ctx.fillStyle = `rgba(220,30,30,${(flashTimer / 18) * 0.55})`;
+    ctx.fillRect(0, 0, W, H);
+    flashTimer--;
+  }
 }
 
 function drawTruck() {
@@ -621,31 +658,51 @@ function startLevel(idx) {
 }
 
 function endGame(won) {
-  if (!gameActive) return; // BUG FIX: prevent double-fire
+  if (!gameActive) return;
   clearInterval(timerInt);
   clearInterval(trafficTimer);
   cancelAnimationFrame(animFrame);
   gameActive = false;
 
-  if (won && !completedLevels.includes(currentLevel)) completedLevels.push(currentLevel);
+  if (won === true && !completedLevels.includes(currentLevel)) completedLevels.push(currentLevel);
   const level = LEVELS[currentLevel];
   const pct = score / level.cattle;
   let msg, sub, stars;
-  if (won)        { msg='Level complete!';            sub=`All ${level.cattle} cattle secured. Outstanding stock handling.`; stars='★★★'; }
-  else if(pct>=0.7){ msg="Time's up — well done";     sub=`${score}/${level.cattle} secured. Solid flight zone awareness.`;  stars='★★☆'; }
-  else if(pct>=0.4){ msg="Time's up — keep practising";sub=`${score}/${level.cattle} secured. Try slower, wider movements.`; stars='★☆☆'; }
-  else             { msg="Time's up — review technique";sub=`${score}/${level.cattle} secured. Fast movement caused panic.`;  stars='☆☆☆'; }
+
+  if (won === 'hit') {
+    const who = hitType === 'person' ? 'You were struck by a vehicle' : 'An animal was struck by a vehicle';
+    msg = 'Incident — attempt ended';
+    sub = `${who}. Stay well clear of moving traffic during a livestock incident. ${score} of ${level.cattle} cattle had been secured.`;
+    stars = '✕';
+  } else if (won === true) {
+    msg = 'Level complete!';
+    sub = `All ${level.cattle} cattle secured. Outstanding stock handling.`;
+    stars = '★★★';
+  } else if (pct >= 0.7) {
+    msg = "Time's up — well done";
+    sub = `${score}/${level.cattle} secured. Solid flight zone awareness.`;
+    stars = '★★☆';
+  } else if (pct >= 0.4) {
+    msg = "Time's up — keep practising";
+    sub = `${score}/${level.cattle} secured. Try slower, wider movements.`;
+    stars = '★☆☆';
+  } else {
+    msg = "Time's up — review technique";
+    sub = `${score}/${level.cattle} secured. Fast movement caused panic.`;
+    stars = '☆☆☆';
+  }
 
   const nextIdx = currentLevel + 1;
   const hasNext = nextIdx < LEVELS.length;
   let btns = `<button class="btn" onclick="startLevel(${currentLevel})">Retry</button>`;
-  if (won && hasNext) btns += `<button class="btn" onclick="startLevel(${nextIdx})">Next level →</button>`;
+  if (won === true && hasNext) btns += `<button class="btn" onclick="startLevel(${nextIdx})">Next level →</button>`;
 
   const ov = document.getElementById('overlay');
   ov.style.display = 'flex';
+  const starColor = won === 'hit' ? '#e74c3c' : '#f0c040';
   ov.innerHTML = `
     <h2>${msg}</h2>
-    <p style="color:#f0c040;font-size:18px;letter-spacing:2px;margin:0">${stars}</p>
+    <p style="color:${starColor};font-size:20px;letter-spacing:3px;margin:0">${stars}</p>
     <p class="sub">${sub}</p>
     <div class="level-pills" id="pillrow2"></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">${btns}<button class="btn-ghost" onclick="showMenu()">Level select</button></div>
