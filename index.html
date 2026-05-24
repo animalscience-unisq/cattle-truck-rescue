@@ -277,7 +277,7 @@ function updateCattle(level) {
   const isNight = level.name.includes('Night');
 
   cattle.forEach(cow => {
-    if (cow.state === 'secured') return;
+    if (cow.state === 'secured' || cow.state === 'struck') return;
 
     const dx = cow.x - human.x, dy = cow.y - human.y;
     const dist = Math.sqrt(dx*dx + dy*dy);
@@ -363,8 +363,10 @@ function updateCattle(level) {
       cattleSecured++;
       liveScore += PTS_PER_ANIMAL;
       document.getElementById('sc').textContent = cattleSecured;
-      showMsg(`+${PTS_PER_ANIMAL} — secured! (${cattle.length-cattleSecured} left)`);
-      if (cattleSecured >= cattle.length) endGame(true);
+      const aliveCount = cattle.filter(c => c.state !== 'struck').length;
+      showMsg(`+${PTS_PER_ANIMAL} — secured! (${aliveCount - cattleSecured} left)`);
+      // Win if all alive (non-struck) cattle are now secured
+      if (cattleSecured >= aliveCount) endGame(true);
     }
   });
 
@@ -403,11 +405,10 @@ function updateVehicles() {
       // Cattle collision
       let struck = false;
       for (const cow of cattle) {
-        if (cow.state === 'secured' || cow.hit) continue;
+        if (cow.state === 'secured' || cow.state === 'struck') continue;
         const cdx = cow.x - v.x, cdy = cow.y - v.y;
         if (Math.abs(cdx) < v.w/2 + cow.size*0.5 && Math.abs(cdy) < v.h/2 + cow.size*0.5) {
-          cow.hit = true;
-          applyStrike('animal');
+          applyStrike('animal', cow);
           struck = true;
           break;
         }
@@ -417,15 +418,41 @@ function updateVehicles() {
   }
 }
 
-function applyStrike(type) {
+function applyStrike(type, cow) {
   if (!gameActive) return;
   strikeCount++;
   strikesCooldown = 90;                          // ~1.5s cooldown at 60fps
   flashTimer = 22;
   liveScore = Math.max(0, liveScore + PTS_STRIKE);
   document.getElementById('livescore').textContent = Math.round(liveScore);
-  const who = type === 'person' ? 'You were struck' : 'An animal was struck';
-  showMsg(`⚠ ${who} by a vehicle! ${PTS_STRIKE} pts`);
+
+  if (type === 'animal' && cow) {
+    cow.state = 'struck';                        // exclude from all logic immediately
+    cow.strikeFlash = 30;                        // frames of visual flash before removal
+    // Remove after flash completes (~0.5s)
+    setTimeout(() => {
+      cattle = cattle.filter(c => c !== cow);
+      updateTotDisplay();
+      checkWinAfterStrike();
+    }, 520);
+    showMsg(`⚠ Animal struck and lost! ${PTS_STRIKE} pts`);
+  } else {
+    showMsg(`⚠ You were struck by a vehicle! ${PTS_STRIKE} pts`);
+  }
+}
+
+function updateTotDisplay() {
+  // Total shown is original spawn count; secured count stays as-is
+  document.getElementById('tot').textContent = cattle.length;
+}
+
+function checkWinAfterStrike() {
+  // If all remaining (non-struck) cattle are secured, level is complete
+  if (!gameActive) return;
+  const alive = cattle.filter(c => c.state !== 'struck');
+  if (alive.length > 0 && alive.every(c => c.state === 'secured')) {
+    endGame(true);
+  }
 }
 
 function updateStressUI() {
@@ -541,6 +568,22 @@ function drawGate(g) {
 }
 
 function drawCow(cow, isNight) {
+  // Struck cows: flash red then disappear
+  if (cow.state === 'struck') {
+    if (cow.strikeFlash > 0) {
+      cow.strikeFlash--;
+      ctx.save();
+      ctx.globalAlpha = cow.strikeFlash / 30;
+      ctx.translate(cow.x, cow.y);
+      ctx.fillStyle = '#e74c3c';
+      ctx.beginPath(); ctx.arc(0, 0, cow.size + 6, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = `bold ${Math.round(cow.size)}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('✕', 0, 0);
+      ctx.restore();
+    }
+    return;
+  }
   if (isNight) {
     const d = Math.sqrt((cow.x-human.x)**2+(cow.y-human.y)**2);
     if (d > 155 && cow.state !== 'flee') return;
@@ -728,8 +771,9 @@ function endGame(won) {
   const animPts=cattleSecured*PTS_PER_ANIMAL;
   const stressPen=Math.round(stressPenaltyAccum);
   const strikePen=strikeCount*PTS_STRIKE;
+  const struckCount = strikeCount > 0 ? ` (${strikeCount} lost to traffic)` : '';
   let msg = won===true ? 'Level complete!' : pct>=0.7 ? "Time's up — well done" : pct>=0.4 ? "Time's up — keep practising" : "Time's up — review technique";
-  let sub = won===true ? 'All animals secured — excellent stock handling.' : `${cattleSecured}/${level.cattle} secured.${pct<0.4?' Focus on slower, wider movements.':' Solid effort.'}`;
+  let sub = won===true ? 'All surviving animals secured — excellent stock handling.' : `${cattleSecured}/${LEVELS[currentLevel].cattle} secured.${struckCount}${pct<0.4?' Focus on slower, wider movements.':' Solid effort.'}`;
 
   const nextIdx=currentLevel+1, hasNext=nextIdx<LEVELS.length;
   let btns=`<button class="btn" onclick="startLevel(${currentLevel})">Retry</button>`;
