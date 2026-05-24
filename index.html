@@ -25,61 +25,61 @@ body { display: flex; flex-direction: row; align-items: flex-start; justify-cont
 canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; touch-action: none; }
 
 /* ── HUD ── */
-#hud { position: absolute; top: 0; left: 0; right: 0; padding: 5px 10px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.55); z-index: 10; gap: 4px; flex-wrap: wrap; }
-.hi { color: #fff; font-size: 11px; font-weight: 500; white-space: nowrap; }
-.hv { color: #f0c040; font-size: 13px; }
-#stress-bar { position: absolute; top: 32px; left: 0; right: 0; height: 3px; z-index: 10; transition: background 0.3s; }
-#msg { position: absolute; top: 38px; left: 0; right: 0; text-align: center; font-size: 11px; font-weight: 500; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.8); pointer-events: none; z-index: 10; opacity: 0; transition: opacity 0.4s; }
-@media (max-width: 480px) { .hi { font-size: 10px; } .hv { font-size: 12px; } }
+#hud { position: absolute; top: 0; left: 0; right: 0; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.55); z-index: 10; gap: 4px; flex-wrap: wrap; }
+.hi { color: #fff; font-size: 13px; font-weight: 500; white-space: nowrap; }
+.hv { color: #f0c040; font-size: 15px; }
+#stress-bar { position: absolute; top: 36px; left: 0; right: 0; height: 3px; z-index: 10; transition: background 0.3s; }
+#msg { position: absolute; top: 42px; left: 0; right: 0; text-align: center; font-size: 13px; font-weight: 500; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.8); pointer-events: none; z-index: 10; opacity: 0; transition: opacity 0.4s; }
+@media (max-width: 480px) { .hi { font-size: 12px; } .hv { font-size: 14px; } }
 
 /* ── Legend / tip ── */
-#legend { position: absolute; bottom: 6px; left: 8px; z-index: 10; display: flex; flex-direction: column; gap: 2px; }
-.leg { display: flex; align-items: center; gap: 4px; font-size: 9px; color: rgba(255,255,255,0.65); }
-.dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-#tip { position: absolute; bottom: 6px; right: 8px; font-size: 9px; color: rgba(255,255,255,0.45); z-index: 10; text-align: right; line-height: 1.7; }
+#legend { position: absolute; bottom: 6px; left: 8px; z-index: 10; display: flex; flex-direction: column; gap: 3px; }
+.leg { display: flex; align-items: center; gap: 5px; font-size: 12px; color: rgba(255,255,255,0.75); }
+.dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+#tip { position: absolute; bottom: 6px; right: 8px; font-size: 12px; color: rgba(255,255,255,0.55); z-index: 10; text-align: right; line-height: 1.7; }
 @media (max-width: 480px) { #tip { display: none; } }
 
 /* ── Overlay ── */
-#overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); border-radius: inherit; z-index: 30; flex-direction: column; gap: 10px; padding: 18px; overflow-y: auto; }
-#overlay h2 { color: #fff; font-size: 19px; font-weight: 500; text-align: center; }
-#overlay .sub { color: rgba(255,255,255,0.72); font-size: 13px; text-align: center; max-width: 300px; line-height: 1.6; }
-#overlay ul { color: rgba(255,255,255,0.68); font-size: 13px; list-style: none; display: flex; flex-direction: column; gap: 5px; max-width: 280px; }
+#overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); border-radius: inherit; z-index: 30; flex-direction: column; gap: 11px; padding: 20px; overflow-y: auto; }
+#overlay h2 { color: #fff; font-size: 22px; font-weight: 500; text-align: center; }
+#overlay .sub { color: rgba(255,255,255,0.72); font-size: 14px; text-align: center; max-width: 310px; line-height: 1.6; }
+#overlay ul { color: rgba(255,255,255,0.72); font-size: 14px; list-style: none; display: flex; flex-direction: column; gap: 6px; max-width: 290px; }
 #overlay ul li::before { content: "— "; color: #f0c040; }
-.btn { background: #f0c040; color: #1a1a1a; border: none; border-radius: 8px; padding: 9px 22px; font-size: 13px; font-weight: 600; cursor: pointer; touch-action: manipulation; }
+.btn { background: #f0c040; color: #1a1a1a; border: none; border-radius: 8px; padding: 10px 24px; font-size: 15px; font-weight: 600; cursor: pointer; touch-action: manipulation; }
 .btn:active { background: #d4a820; }
-.btn-ghost { background: transparent; color: #f0c040; border: 1.5px solid #f0c040; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 500; cursor: pointer; touch-action: manipulation; }
+.btn-ghost { background: transparent; color: #f0c040; border: 1.5px solid #f0c040; border-radius: 8px; padding: 9px 16px; font-size: 14px; font-weight: 500; cursor: pointer; touch-action: manipulation; }
 .btn-ghost:active { background: rgba(240,192,64,0.12); }
-.level-pills { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
-.pill { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.65); border: 1px solid rgba(255,255,255,0.18); border-radius: 20px; padding: 3px 9px; font-size: 10px; }
+.level-pills { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.pill { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.18); border-radius: 20px; padding: 4px 11px; font-size: 12px; }
 .pill.done { background: rgba(240,192,64,0.18); color: #f0c040; border-color: rgba(240,192,64,0.35); }
 .pill.active { background: #f0c040; color: #1a1a1a; border-color: #f0c040; }
 
 /* ── Score breakdown ── */
-.score-breakdown { display: flex; flex-direction: column; gap: 4px; width: 100%; max-width: 260px; background: rgba(255,255,255,0.06); border-radius: 8px; padding: 9px 13px; }
-.sb-row { display: flex; justify-content: space-between; font-size: 11px; color: rgba(255,255,255,0.75); }
-.sb-row.total { border-top: 1px solid rgba(255,255,255,0.15); margin-top: 4px; padding-top: 5px; font-weight: 600; color: #f0c040; font-size: 13px; }
+.score-breakdown { display: flex; flex-direction: column; gap: 5px; width: 100%; max-width: 280px; background: rgba(255,255,255,0.06); border-radius: 8px; padding: 11px 14px; }
+.sb-row { display: flex; justify-content: space-between; font-size: 13px; color: rgba(255,255,255,0.78); }
+.sb-row.total { border-top: 1px solid rgba(255,255,255,0.15); margin-top: 5px; padding-top: 6px; font-weight: 600; color: #f0c040; font-size: 15px; }
 .sb-row .neg { color: #e74c3c; }
 .sb-row .pos { color: #2ecc71; }
 
 /* ── Name input ── */
-#name-input-wrap { display: flex; flex-direction: column; gap: 5px; width: 100%; max-width: 260px; }
-#name-input-wrap label { font-size: 10px; color: rgba(255,255,255,0.5); }
-#player-name { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 6px 9px; color: #fff; font-size: 13px; width: 100%; outline: none; -webkit-appearance: none; }
+#name-input-wrap { display: flex; flex-direction: column; gap: 5px; width: 100%; max-width: 280px; }
+#name-input-wrap label { font-size: 13px; color: rgba(255,255,255,0.55); }
+#player-name { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 7px 10px; color: #fff; font-size: 14px; width: 100%; outline: none; -webkit-appearance: none; }
 #player-name:focus { border-color: #f0c040; }
 
 /* ── Scoreboard panel ── */
-#scoreboard { width: 200px; flex-shrink: 0; background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px 10px; display: flex; flex-direction: column; gap: 8px; }
+#scoreboard { width: 220px; flex-shrink: 0; background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 12px; display: flex; flex-direction: column; gap: 9px; }
 @media (max-width: 780px) { #scoreboard { width: calc(100vw - 12px); border-radius: 10px; } }
-#scoreboard h3 { color: #f0c040; font-size: 12px; font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 7px; }
-.sb-entry { display: flex; flex-direction: column; gap: 2px; padding: 6px 7px; background: rgba(255,255,255,0.04); border-radius: 7px; border-left: 3px solid transparent; }
+#scoreboard h3 { color: #f0c040; font-size: 15px; font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+.sb-entry { display: flex; flex-direction: column; gap: 3px; padding: 7px 8px; background: rgba(255,255,255,0.04); border-radius: 7px; border-left: 3px solid transparent; }
 .sb-entry.rank-1 { border-left-color: #f0c040; background: rgba(240,192,64,0.07); }
 .sb-entry.rank-2 { border-left-color: #aaa; }
 .sb-entry.rank-3 { border-left-color: #c87941; }
-.sb-entry .sb-name { font-size: 11px; color: rgba(255,255,255,0.85); font-weight: 500; display: flex; justify-content: space-between; }
-.sb-entry .sb-detail { font-size: 9px; color: rgba(255,255,255,0.4); }
-.sb-entry .sb-pts { color: #f0c040; font-size: 12px; font-weight: 600; }
-.sb-empty { font-size: 11px; color: rgba(255,255,255,0.28); text-align: center; padding: 10px 0; }
-.sb-scoring { font-size: 9px; color: rgba(255,255,255,0.3); line-height: 1.85; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 7px; }
+.sb-entry .sb-name { font-size: 13px; color: rgba(255,255,255,0.88); font-weight: 500; display: flex; justify-content: space-between; }
+.sb-entry .sb-detail { font-size: 11px; color: rgba(255,255,255,0.45); }
+.sb-entry .sb-pts { color: #f0c040; font-size: 14px; font-weight: 600; }
+.sb-empty { font-size: 13px; color: rgba(255,255,255,0.3); text-align: center; padding: 12px 0; }
+.sb-scoring { font-size: 11px; color: rgba(255,255,255,0.35); line-height: 1.9; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; }
 </style>
 </head>
 <body>
@@ -126,12 +126,11 @@ canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; touch-a
   <h3>🏆 Scoreboard</h3>
   <div id="sb-list"><p class="sb-empty">No scores yet</p></div>
   <div class="sb-scoring">
-    <b style="color:rgba(255,255,255,0.5)">Scoring</b><br>
-    +100 per animal secured<br>
-    +2 per second remaining<br>
-    −stress per calm-frame<br>
-    −150 per vehicle strike<br>
-    +500 all animals secured
+    <b style="color:rgba(255,255,255,0.6)">Scoring</b><br>
+    +50 per animal secured<br>
+    +1 per second remaining<br>
+    −stress penalises heavily<br>
+    −200 per vehicle strike
   </div>
 </div>
 
@@ -154,11 +153,11 @@ let flashTimer = 0;
 
 // Scoring
 let liveScore = 0, stressPenaltyAccum = 0, strikeCount = 0, strikesCooldown = 0;
-const PTS_PER_ANIMAL   = 100;
-const PTS_TIME_BONUS   = 2;
-const PTS_ALL_SECURED  = 500;
-const PTS_STRIKE       = -150;
-const PTS_STRESS_FRAME = -0.05;
+const PTS_PER_ANIMAL   = 50;   // was 100 — halved so animals alone can't carry the score
+const PTS_TIME_BONUS   = 1;    // was 2 — less reward for speed
+const PTS_ALL_SECURED  = 0;    // removed — no bonus for full completion
+const PTS_STRIKE       = -200; // was -150 — heavier traffic penalty
+const PTS_STRESS_FRAME = -0.15; // was -0.05 — 3× stress drain, calm handling matters much more
 
 let scoreboard = [];
 let playerName = 'Handler'; // persists across all overlay rebuilds
@@ -707,11 +706,10 @@ function endGame(won) {
   gameActive=false;
 
   const level=LEVELS[currentLevel];
-  let timeBonus=0, allBonus=0;
+  let timeBonus=0;
   if (won===true) {
-    allBonus=PTS_ALL_SECURED;
     timeBonus=timer*PTS_TIME_BONUS;
-    liveScore+=timeBonus+allBonus;
+    liveScore+=timeBonus;
   }
   const finalScore=Math.max(0,Math.round(liveScore));
   const pct=cattleSecured/level.cattle;
@@ -746,7 +744,6 @@ function endGame(won) {
     <div class="score-breakdown">
       <div class="sb-row"><span>Animals secured (×${PTS_PER_ANIMAL})</span><span class="pos">+${animPts}</span></div>
       ${won===true?`<div class="sb-row"><span>Time bonus (${timer}s × ${PTS_TIME_BONUS})</span><span class="pos">+${timeBonus}</span></div>`:''}
-      ${won===true?`<div class="sb-row"><span>All-secured bonus</span><span class="pos">+${allBonus}</span></div>`:''}
       <div class="sb-row"><span>Stress penalty</span><span class="neg">${stressPen}</span></div>
       <div class="sb-row"><span>Vehicle strikes (×${strikeCount})</span><span class="neg">${strikePen}</span></div>
       <div class="sb-row total"><span>Final score</span><span>${finalScore}</span></div>
