@@ -6,40 +6,74 @@
 <title>Cattle rescue behaviour simulator</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-body { background: #1a1a1a; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: system-ui, sans-serif; }
-#wrap { position: relative; cursor: crosshair; width: 700px; height: 580px; background: #4a7a30; border-radius: 12px; border: 0.5px solid rgba(255,255,255,0.15); overflow: hidden;  }
+body { background: #111; display: flex; gap: 0; align-items: flex-start; justify-content: center; min-height: 100vh; font-family: system-ui, sans-serif; padding: 16px; }
+
+#wrap { position: relative; cursor: crosshair; width: 680px; flex-shrink: 0; height: 580px; background: #4a7a30; border-radius: 12px; border: 0.5px solid rgba(255,255,255,0.15); overflow: hidden; }
 canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-#hud { position: absolute; top: 0; left: 0; right: 0; padding: 7px 14px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.55); z-index: 10; gap: 8px; flex-wrap: wrap; }
-.hi { color: #fff; font-size: 12px; font-weight: 500; white-space: nowrap; }
-.hv { color: #f0c040; font-size: 15px; }
-#stress-bar { position: absolute; top: 36px; left: 0; right: 0; height: 3px; z-index: 10; transition: background 0.3s; }
-#msg { position: absolute; top: 44px; left: 0; right: 0; text-align: center; font-size: 13px; font-weight: 500; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.8); pointer-events: none; z-index: 10; opacity: 0; transition: opacity 0.4s; }
-#legend { position: absolute; bottom: 8px; left: 12px; z-index: 10; display: flex; flex-direction: column; gap: 3px; }
-.leg { display: flex; align-items: center; gap: 5px; font-size: 10px; color: rgba(255,255,255,0.75); }
+
+/* HUD */
+#hud { position: absolute; top: 0; left: 0; right: 0; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.55); z-index: 10; gap: 6px; flex-wrap: wrap; }
+.hi { color: #fff; font-size: 11px; font-weight: 500; white-space: nowrap; }
+.hv { color: #f0c040; font-size: 14px; }
+.hv.red { color: #e74c3c; }
+#stress-bar { position: absolute; top: 34px; left: 0; right: 0; height: 3px; z-index: 10; transition: background 0.3s; }
+#msg { position: absolute; top: 42px; left: 0; right: 0; text-align: center; font-size: 12px; font-weight: 500; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.8); pointer-events: none; z-index: 10; opacity: 0; transition: opacity 0.4s; }
+
+/* Legend */
+#legend { position: absolute; bottom: 8px; left: 10px; z-index: 10; display: flex; flex-direction: column; gap: 3px; }
+.leg { display: flex; align-items: center; gap: 5px; font-size: 10px; color: rgba(255,255,255,0.72); }
 .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-#tip { position: absolute; bottom: 8px; right: 12px; font-size: 10px; color: rgba(255,255,255,0.55); z-index: 10; text-align: right; line-height: 1.7; }
-#overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.78); border-radius: 12px; z-index: 30; flex-direction: column; gap: 12px; padding: 24px; }
-#overlay h2 { color: #fff; font-size: 19px; font-weight: 500; text-align: center; }
-#overlay .sub { color: rgba(255,255,255,0.75); font-size: 12px; text-align: center; max-width: 320px; line-height: 1.65; }
-#overlay ul { color: rgba(255,255,255,0.72); font-size: 11px; list-style: none; display: flex; flex-direction: column; gap: 4px; max-width: 290px; }
+#tip { position: absolute; bottom: 8px; right: 10px; font-size: 10px; color: rgba(255,255,255,0.5); z-index: 10; text-align: right; line-height: 1.7; }
+
+/* Overlay */
+#overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.78); border-radius: 12px; z-index: 30; flex-direction: column; gap: 11px; padding: 22px; }
+#overlay h2 { color: #fff; font-size: 18px; font-weight: 500; text-align: center; }
+#overlay .sub { color: rgba(255,255,255,0.72); font-size: 12px; text-align: center; max-width: 310px; line-height: 1.6; }
+#overlay ul { color: rgba(255,255,255,0.7); font-size: 11px; list-style: none; display: flex; flex-direction: column; gap: 4px; max-width: 280px; }
 #overlay ul li::before { content: "— "; color: #f0c040; }
-.btn { background: #f0c040; color: #1a1a1a; border: none; border-radius: 8px; padding: 8px 24px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.btn { background: #f0c040; color: #1a1a1a; border: none; border-radius: 8px; padding: 8px 22px; font-size: 13px; font-weight: 500; cursor: pointer; }
 .btn:hover { background: #d4a820; }
-.btn-ghost { background: transparent; color: #f0c040; border: 1.5px solid #f0c040; border-radius: 8px; padding: 7px 16px; font-size: 12px; font-weight: 500; cursor: pointer; }
+.btn-ghost { background: transparent; color: #f0c040; border: 1.5px solid #f0c040; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 500; cursor: pointer; }
 .btn-ghost:hover { background: rgba(240,192,64,0.12); }
-.level-pills { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
-.pill { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 4px 12px; font-size: 11px; }
-.pill.done { background: rgba(240,192,64,0.2); color: #f0c040; border-color: rgba(240,192,64,0.4); }
+.level-pills { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
+.pill { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.65); border: 1px solid rgba(255,255,255,0.18); border-radius: 20px; padding: 3px 10px; font-size: 10px; }
+.pill.done { background: rgba(240,192,64,0.18); color: #f0c040; border-color: rgba(240,192,64,0.35); }
 .pill.active { background: #f0c040; color: #1a1a1a; border-color: #f0c040; }
+
+/* Score breakdown in overlay */
+.score-breakdown { display: flex; flex-direction: column; gap: 4px; width: 100%; max-width: 270px; background: rgba(255,255,255,0.06); border-radius: 8px; padding: 10px 14px; }
+.sb-row { display: flex; justify-content: space-between; font-size: 11px; color: rgba(255,255,255,0.75); }
+.sb-row.total { border-top: 1px solid rgba(255,255,255,0.15); margin-top: 4px; padding-top: 6px; font-weight: 600; color: #f0c040; font-size: 13px; }
+.sb-row .neg { color: #e74c3c; }
+.sb-row .pos { color: #2ecc71; }
+
+/* Scoreboard panel */
+#scoreboard { width: 210px; flex-shrink: 0; background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 12px; display: flex; flex-direction: column; gap: 10px; margin-left: 12px; }
+#scoreboard h3 { color: #f0c040; font-size: 13px; font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.sb-entry { display: flex; flex-direction: column; gap: 2px; padding: 7px 8px; background: rgba(255,255,255,0.04); border-radius: 8px; border-left: 3px solid transparent; }
+.sb-entry.rank-1 { border-left-color: #f0c040; background: rgba(240,192,64,0.07); }
+.sb-entry.rank-2 { border-left-color: #aaa; background: rgba(200,200,200,0.05); }
+.sb-entry.rank-3 { border-left-color: #c87941; background: rgba(200,120,65,0.06); }
+.sb-entry .sb-name { font-size: 11px; color: rgba(255,255,255,0.85); font-weight: 500; display: flex; justify-content: space-between; }
+.sb-entry .sb-detail { font-size: 10px; color: rgba(255,255,255,0.45); }
+.sb-entry .sb-pts { color: #f0c040; font-size: 13px; font-weight: 600; }
+.sb-empty { font-size: 11px; color: rgba(255,255,255,0.3); text-align: center; padding: 12px 0; }
+.sb-scoring { font-size: 10px; color: rgba(255,255,255,0.35); line-height: 1.8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; }
+#name-input-wrap { display: flex; flex-direction: column; gap: 6px; }
+#name-input-wrap label { font-size: 10px; color: rgba(255,255,255,0.5); }
+#player-name { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 5px 8px; color: #fff; font-size: 12px; width: 100%; outline: none; }
+#player-name:focus { border-color: #f0c040; }
 </style>
 </head>
 <body>
+
 <div id="wrap">
   <canvas id="c"></canvas>
   <div id="hud">
     <div class="hi">Level: <span class="hv" id="lvlname">—</span></div>
     <div class="hi">Secured: <span class="hv" id="sc">0</span>/<span id="tot">—</span></div>
     <div class="hi">Stress: <span class="hv" id="stlvl">Low</span></div>
+    <div class="hi">Score: <span class="hv" id="livescore">0</span></div>
     <div class="hi">Time: <span class="hv" id="clk">—</span>s</div>
   </div>
   <div id="stress-bar"></div>
@@ -53,17 +87,35 @@ canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
   <div id="tip">Move cursor to herd cattle<br>Slow = calm · Fast = panic<br>Click yellow gates to open</div>
   <div id="overlay">
     <h2>Cattle rescue simulator</h2>
-    <p class="sub">A truck has rolled — cattle are loose on the highway. Guide them into the safe zones before time runs out.</p>
+    <p class="sub">A truck has rolled — cattle are loose on the highway. Guide them to safety before time runs out.</p>
     <ul>
       <li>Enter the flight zone and cattle move away from you</li>
-      <li>Move slowly to guide calmly, fast to scatter</li>
+      <li>Move slowly to guide calmly — fast movement panics the herd</li>
       <li>Open gates before herding cattle through them</li>
-      <li>Watch for traffic — it panics the whole herd</li>
+      <li>Vehicle strikes lose points — don't lose them all!</li>
     </ul>
+    <div id="name-input-wrap">
+      <label for="player-name">Your name (for scoreboard)</label>
+      <input id="player-name" type="text" maxlength="18" placeholder="Handler name…" value="Handler">
+    </div>
     <div class="level-pills" id="pillrow"></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
       <button class="btn" onclick="startLevel(0)">Start level 1</button>
     </div>
+  </div>
+</div>
+
+<!-- Scoreboard -->
+<div id="scoreboard">
+  <h3>🏆 Scoreboard</h3>
+  <div id="sb-list"><p class="sb-empty">No scores yet</p></div>
+  <div class="sb-scoring">
+    <b style="color:rgba(255,255,255,0.55)">Scoring guide</b><br>
+    +100 per animal secured<br>
+    +2 per second remaining<br>
+    −1 per stress-frame<br>
+    −150 per vehicle strike<br>
+    +500 all animals secured
   </div>
 </div>
 
@@ -76,66 +128,64 @@ let W, H, ROAD_X;
 const ROAD_W = 160;
 let cattle = [], vehicles = [], gates = [], zones = [];
 let human = {x:200,y:400,vx:0,vy:0,px:200,py:400};
-let score = 0, timer = 90, timerInt, gameActive = false, herdStress = 0;
+let cattleSecured = 0, timer = 90, timerInt, gameActive = false, herdStress = 0;
 let currentLevel = 0, completedLevels = [];
 let animFrame, trafficTimer;
+let flashTimer = 0, hitType = '';
+
+// ── Scoring state ──────────────────────────────────────────────
+let liveScore = 0;
+let stressPenaltyAccum = 0;   // accumulated per-frame stress deductions
+let strikeCount = 0;          // vehicle strikes this attempt
+let strikesCooldown = 0;      // frames before next strike can register (avoid multi-hit)
+const PTS_PER_ANIMAL   = 100;
+const PTS_TIME_BONUS   = 2;   // per second remaining
+const PTS_ALL_SECURED  = 500;
+const PTS_STRIKE       = -150;
+const PTS_STRESS_FRAME = -0.05; // per frame per herd-stress unit (normalised 0-1 per animal)
+
+// Scoreboard data (persists across levels in session)
+let scoreboard = []; // { name, score, level, stars, date }
 
 const LEVELS = [
-  { name:'1 · Open road',      cattle:8,  time:90, trafficFreq:0,    trafficSpeed:0,   gateZones:false, zoneSize:130,
-    brief:'No traffic, wide safe zones. Learn the flight zone basics.',
-    tips:['Move slowly and steadily','Work behind the cattle to push them forward','Aim for the dashed safe zones on each side'] },
-  { name:'2 · Light traffic',  cattle:9,  time:80, trafficFreq:8000, trafficSpeed:2.2, gateZones:false, zoneSize:115,
-    brief:'Occasional vehicles pass through. Traffic panics the herd.',
-    tips:['Passing vehicles trigger a panic wave','Secure calm animals first while others scatter','Recover your position quickly after traffic'] },
-  { name:'3 · Gated paddock',  cattle:9,  time:90, trafficFreq:0,    trafficSpeed:0,   gateZones:true,  zoneSize:100,
-    brief:'Safe zones now have gates. Click to open before herding cattle through.',
-    tips:['Click the yellow gate bars to open them','Cattle cannot enter while the gate is closed','Closed gates act as barriers — use them'] },
-  { name:'4 · Rush hour',      cattle:10, time:75, trafficFreq:4500, trafficSpeed:3.0, gateZones:true,  zoneSize:100,
-    brief:'Heavy traffic and gated paddocks. Time is short.',
-    tips:['Open gates early before herding','Use road edges to contain scattered cattle','Let traffic pass then quickly recover position'] },
-  { name:'5 · Night incident', cattle:12, time:70, trafficFreq:3500, trafficSpeed:3.5, gateZones:true,  zoneSize:88,
-    brief:'Night scene: reduced visibility, more cattle, fast traffic, small zones.',
-    tips:['Cattle only appear when close to you','Keep the herd together — panic is contagious','Work methodically — do not rush'] },
+  { name:'1 · Open road',      cattle:8,  time:90, trafficFreq:0,    trafficSpeed:0,   gateZones:false, zoneSize:130 },
+  { name:'2 · Light traffic',  cattle:9,  time:80, trafficFreq:8000, trafficSpeed:2.2, gateZones:false, zoneSize:115 },
+  { name:'3 · Gated paddock',  cattle:9,  time:90, trafficFreq:0,    trafficSpeed:0,   gateZones:true,  zoneSize:100 },
+  { name:'4 · Rush hour',      cattle:10, time:75, trafficFreq:4500, trafficSpeed:3.0, gateZones:true,  zoneSize:100 },
+  { name:'5 · Night incident', cattle:12, time:70, trafficFreq:3500, trafficSpeed:3.5, gateZones:true,  zoneSize:88  },
 ];
 
 function resize() {
-  W = wrap.offsetWidth;
-  H = wrap.offsetHeight;
-  canvas.width = W;
-  canvas.height = H;
+  W = wrap.offsetWidth; H = wrap.offsetHeight;
+  canvas.width = W; canvas.height = H;
   ROAD_X = (W - ROAD_W) / 2;
 }
 
-// Cross-browser rounded rect (ctx.roundRect not available in older Safari/Firefox)
 function roundRect(x, y, w, h, r) {
   ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
   ctx.closePath();
 }
 
 function buildZones(level) {
   const zs = level.zoneSize;
-  const zoneH = Math.min(zs + 20, (H - 75) / 2 - 8);
-  const zoneW = Math.min(zs, ROAD_X - 20);
-  const zoneWR = Math.min(zs, W - ROAD_X - ROAD_W - 20);
+  const zoneH = Math.min(zs+20, (H-75)/2-8);
+  const zoneW  = Math.min(zs, ROAD_X-20);
+  const zoneWR = Math.min(zs, W-ROAD_X-ROAD_W-20);
   zones = [
-    { x:10,             y:55,          w:zoneW, h:zoneH, label:'Left A'  },
-    { x:10,             y:55+zoneH+10, w:zoneW, h:zoneH, label:'Left B'  },
-    { x:ROAD_X+ROAD_W+10, y:55,        w:zoneWR, h:zoneH, label:'Right A' },
-    { x:ROAD_X+ROAD_W+10, y:55+zoneH+10, w:zoneWR, h:zoneH, label:'Right B' },
+    { x:10,               y:55,           w:zoneW,  h:zoneH },
+    { x:10,               y:55+zoneH+10,  w:zoneW,  h:zoneH },
+    { x:ROAD_X+ROAD_W+10, y:55,           w:zoneWR, h:zoneH },
+    { x:ROAD_X+ROAD_W+10, y:55+zoneH+10, w:zoneWR, h:zoneH },
   ];
-  gates = level.gateZones ? zones.map((z, i) => ({
-    zoneIdx: i, open: false,
-    cx: z.x + z.w / 2, cy: z.y
-  })) : [];
+  gates = level.gateZones ? zones.map((_,i) => ({ zoneIdx:i, open:false })) : [];
 }
 
 function spawnCattle(n) {
@@ -143,515 +193,403 @@ function spawnCattle(n) {
   cattle = [];
   for (let i = 0; i < n; i++) {
     let x, y;
-    if (i < Math.ceil(n * 0.7)) {
-      x = ROAD_X + 10 + Math.random() * (ROAD_W - 20);
-      y = 60 + Math.random() * (H - 100);
+    if (i < Math.ceil(n*0.7)) {
+      x = ROAD_X + 10 + Math.random()*(ROAD_W-20);
+      y = 60 + Math.random()*(H-100);
     } else {
-      const side = i % 2 === 0 ? -1 : 1;
-      x = ROAD_X + ROAD_W / 2 + side * (ROAD_W / 2 + 15 + Math.random() * 55);
-      y = 60 + Math.random() * (H - 100);
+      const side = i%2===0 ? -1 : 1;
+      x = ROAD_X + ROAD_W/2 + side*(ROAD_W/2+15+Math.random()*55);
+      y = 60 + Math.random()*(H-100);
     }
     cattle.push({
-      x: Math.max(20, Math.min(W - 20, x)),
-      y: Math.max(60, Math.min(H - 20, y)),
-      vx: (Math.random() - 0.5) * 0.4,
-      vy: (Math.random() - 0.5) * 0.4,
-      angle: Math.random() * Math.PI * 2,
-      state: 'calm',
-      color: colors[i % colors.length],
-      size: 16 + Math.random() * 5,
-      wobble: Math.random() * Math.PI * 2,
-      fleeTimer: 0
+      x: Math.max(20, Math.min(W-20, x)),
+      y: Math.max(60, Math.min(H-20, y)),
+      vx:(Math.random()-0.5)*0.4, vy:(Math.random()-0.5)*0.4,
+      angle:Math.random()*Math.PI*2,
+      state:'calm',
+      color:colors[i%colors.length],
+      size:16+Math.random()*5,
+      wobble:Math.random()*Math.PI*2,
+      fleeTimer:0, hit:false,
     });
   }
 }
 
 function spawnVehicle(level) {
-  const side = Math.random() < 0.5 ? 1 : -1;
-  const lane = side === 1 ? ROAD_X + ROAD_W * 0.27 : ROAD_X + ROAD_W * 0.73;
-  vehicles.push({
-    x: lane, y: side === 1 ? -50 : H + 50,
-    vy: side * level.trafficSpeed,
-    w: 30, h: 54,
-    color: ['#3498db','#e74c3c','#95a5a6','#f39c12'][Math.floor(Math.random() * 4)]
-  });
+  const side = Math.random()<0.5 ? 1 : -1;
+  const lane = side===1 ? ROAD_X+ROAD_W*0.27 : ROAD_X+ROAD_W*0.73;
+  vehicles.push({ x:lane, y:side===1?-50:H+50, vy:side*level.trafficSpeed, w:30, h:54,
+    color:['#3498db','#e74c3c','#95a5a6','#f39c12'][Math.floor(Math.random()*4)] });
 }
 
 function anyZone(cow) {
-  return zones.findIndex((z, i) => {
-    const blocked = gates.find(g => g.zoneIdx === i && !g.open);
-    return !blocked && cow.x > z.x && cow.x < z.x + z.w && cow.y > z.y && cow.y < z.y + z.h;
+  return zones.findIndex((z,i) => {
+    const blocked = gates.find(g => g.zoneIdx===i && !g.open);
+    return !blocked && cow.x>z.x && cow.x<z.x+z.w && cow.y>z.y && cow.y<z.y+z.h;
   });
 }
+function onRoad(cow) { return cow.x>ROAD_X && cow.x<ROAD_X+ROAD_W; }
 
-function onRoad(cow) {
-  return cow.x > ROAD_X && cow.x < ROAD_X + ROAD_W;
+// ── Per-frame score update ──────────────────────────────────────
+function updateLiveScore() {
+  // Stress penalty: sum stress across unsecured animals, scaled
+  const unsecured = cattle.filter(c => c.state !== 'secured').length;
+  if (unsecured > 0) {
+    const stressNorm = herdStress / 10; // 0–1
+    const penalty = stressNorm * PTS_STRESS_FRAME * unsecured;
+    stressPenaltyAccum += penalty;
+    liveScore = Math.max(0, liveScore + penalty);
+  }
+  document.getElementById('livescore').textContent = Math.round(liveScore);
 }
 
 function updateCattle(level) {
-  const hSpeed = Math.sqrt(human.vx * human.vx + human.vy * human.vy);
+  const hSpeed = Math.sqrt(human.vx*human.vx+human.vy*human.vy);
   herdStress = 0;
   const isNight = level.name.includes('Night');
 
   cattle.forEach(cow => {
-    if (cow.state === 'secured') return;
+    if (cow.state==='secured') return;
+    const dx=cow.x-human.x, dy=cow.y-human.y;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    const flightZone=75+hSpeed*11, alertZone=120+hSpeed*7;
+    const visLimit=isNight?145:9999;
 
-    const dx = cow.x - human.x, dy = cow.y - human.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    const flightZone = 75 + hSpeed * 11;
-    const alertZone  = 120 + hSpeed * 7;
-    const visLimit   = isNight ? 145 : 9999;
+    let state='calm';
+    if (dist<Math.min(flightZone,visLimit)) state='flee';
+    else if (dist<Math.min(alertZone,visLimit)) state='alert';
+    cow.state=state;
 
-    let state = 'calm';
-    if (dist < Math.min(flightZone, visLimit)) state = 'flee';
-    else if (dist < Math.min(alertZone, visLimit)) state = 'alert';
-    cow.state = state;
-
-    // Herd contagion
     cattle.forEach(other => {
-      if (other === cow || other.state === 'secured') return;
-      const od = Math.sqrt((cow.x - other.x) ** 2 + (cow.y - other.y) ** 2);
-      if (od < 55 && other.state === 'flee') cow.state = 'alert';
+      if (other===cow||other.state==='secured') return;
+      const od=Math.sqrt((cow.x-other.x)**2+(cow.y-other.y)**2);
+      if (od<55&&other.state==='flee') cow.state='alert';
     });
 
-    // Vehicle panic
     vehicles.forEach(v => {
-      const vd = Math.sqrt((cow.x - v.x) ** 2 + (cow.y - v.y) ** 2);
-      if (vd < 90) { cow.state = 'flee'; herdStress += 1.5; }
+      const vd=Math.sqrt((cow.x-v.x)**2+(cow.y-v.y)**2);
+      if (vd<90) { cow.state='flee'; herdStress+=1.5; }
     });
 
-    // Closed gate repulsion
     gates.forEach(g => {
       if (g.open) return;
-      const z = zones[g.zoneIdx];
-      const gdx = cow.x - (z.x + z.w / 2), gdy = cow.y - z.y;
-      const gd = Math.sqrt(gdx * gdx + gdy * gdy);
-      if (gd < 45) { cow.vx += (gdx / gd) * 0.5; cow.vy += (gdy / gd) * 0.5; }
+      const z=zones[g.zoneIdx];
+      const gdx=cow.x-(z.x+z.w/2), gdy=cow.y-z.y;
+      const gd=Math.sqrt(gdx*gdx+gdy*gdy);
+      if (gd<45) { cow.vx+=(gdx/gd)*0.5; cow.vy+=(gdy/gd)*0.5; }
     });
 
-    if (cow.state === 'flee') {
-      herdStress += 2;
-      const nx = dx / (dist || 1), ny = dy / (dist || 1);
-      const spd = 1.6 + hSpeed * 0.35;
-      cow.vx += nx * spd * 0.28; cow.vy += ny * spd * 0.28;
-      cow.vx += (Math.random() - 0.5) * 0.7;
-      cow.vy += (Math.random() - 0.5) * 0.7;
-    } else if (cow.state === 'alert') {
-      herdStress += 0.4;
-      if (dist > 0) { cow.vx += (dx / dist) * 0.18; cow.vy += (dy / dist) * 0.18; }
+    if (cow.state==='flee') {
+      herdStress+=2;
+      const nx=dx/(dist||1), ny=dy/(dist||1);
+      const spd=1.6+hSpeed*0.35;
+      cow.vx+=nx*spd*0.28; cow.vy+=ny*spd*0.28;
+      cow.vx+=(Math.random()-0.5)*0.7; cow.vy+=(Math.random()-0.5)*0.7;
+    } else if (cow.state==='alert') {
+      herdStress+=0.4;
+      if (dist>0) { cow.vx+=(dx/dist)*0.18; cow.vy+=(dy/dist)*0.18; }
     } else {
-      if (cow.fleeTimer > 0) cow.fleeTimer--;
-      cow.vx *= 0.91; cow.vy *= 0.91;
-      cow.vx += (Math.random() - 0.5) * 0.04;
-      cow.vy += (Math.random() - 0.5) * 0.04;
+      if (cow.fleeTimer>0) cow.fleeTimer--;
+      cow.vx*=0.91; cow.vy*=0.91;
+      cow.vx+=(Math.random()-0.5)*0.04; cow.vy+=(Math.random()-0.5)*0.04;
     }
 
-    // Cohesion / separation
     cattle.forEach(other => {
-      if (other === cow || other.state === 'secured') return;
-      const od = Math.sqrt((cow.x - other.x) ** 2 + (cow.y - other.y) ** 2);
-      if (od > 10 && od < 38 && cow.state !== 'flee') {
-        cow.vx += ((other.x - cow.x) / od) * 0.025;
-        cow.vy += ((other.y - cow.y) / od) * 0.025;
-      }
-      if (od < 16) {
-        cow.vx -= ((other.x - cow.x) / od) * 0.28;
-        cow.vy -= ((other.y - cow.y) / od) * 0.28;
-      }
+      if (other===cow||other.state==='secured') return;
+      const od=Math.sqrt((cow.x-other.x)**2+(cow.y-other.y)**2);
+      if (od>10&&od<38&&cow.state!=='flee') { cow.vx+=((other.x-cow.x)/od)*0.025; cow.vy+=((other.y-cow.y)/od)*0.025; }
+      if (od<16) { cow.vx-=((other.x-cow.x)/od)*0.28; cow.vy-=((other.y-cow.y)/od)*0.28; }
     });
 
-    const spd = Math.sqrt(cow.vx * cow.vx + cow.vy * cow.vy);
-    const maxSpd = cow.state === 'flee' ? 4.2 : 1.1;
-    if (spd > maxSpd) { cow.vx = (cow.vx / spd) * maxSpd; cow.vy = (cow.vy / spd) * maxSpd; }
+    const spd=Math.sqrt(cow.vx*cow.vx+cow.vy*cow.vy);
+    const maxSpd=cow.state==='flee'?4.2:1.1;
+    if (spd>maxSpd) { cow.vx=(cow.vx/spd)*maxSpd; cow.vy=(cow.vy/spd)*maxSpd; }
 
-    cow.x += cow.vx; cow.y += cow.vy;
-    cow.wobble += 0.14;
-    if (spd > 0.1) cow.angle = Math.atan2(cow.vy, cow.vx);
+    cow.x+=cow.vx; cow.y+=cow.vy; cow.wobble+=0.14;
+    if (spd>0.1) cow.angle=Math.atan2(cow.vy,cow.vx);
 
-    const pad = cow.size;
-    if (cow.x < pad)   { cow.x = pad;   cow.vx =  Math.abs(cow.vx) * 0.5; }
-    if (cow.x > W-pad) { cow.x = W-pad; cow.vx = -Math.abs(cow.vx) * 0.5; }
-    if (cow.y < 42)    { cow.y = 42;    cow.vy =  Math.abs(cow.vy) * 0.5; }
-    if (cow.y > H-pad) { cow.y = H-pad; cow.vy = -Math.abs(cow.vy) * 0.5; }
+    const pad=cow.size;
+    if (cow.x<pad)   { cow.x=pad;   cow.vx= Math.abs(cow.vx)*0.5; }
+    if (cow.x>W-pad) { cow.x=W-pad; cow.vx=-Math.abs(cow.vx)*0.5; }
+    if (cow.y<42)    { cow.y=42;    cow.vy= Math.abs(cow.vy)*0.5; }
+    if (cow.y>H-pad) { cow.y=H-pad; cow.vy=-Math.abs(cow.vy)*0.5; }
 
-    const zi = anyZone(cow);
-    if (zi >= 0 && !onRoad(cow)) {
-      cow.state = 'secured'; cow.vx = 0; cow.vy = 0;
-      score++;
-      document.getElementById('sc').textContent = score;
-      showMsg('+1 secured — ' + (cattle.length - score) + ' remaining');
-      if (score >= cattle.length) endGame(true); // explicit true = win
+    const zi=anyZone(cow);
+    if (zi>=0&&!onRoad(cow)) {
+      cow.state='secured'; cow.vx=0; cow.vy=0;
+      cattleSecured++;
+      // Award points for securing
+      liveScore += PTS_PER_ANIMAL;
+      document.getElementById('sc').textContent=cattleSecured;
+      showMsg(`+${PTS_PER_ANIMAL} pts — animal secured! (${cattle.length-cattleSecured} left)`);
+      if (cattleSecured>=cattle.length) endGame(true);
     }
   });
 
-  herdStress = Math.min(10, herdStress);
+  herdStress=Math.min(10,herdStress);
   updateStressUI();
+  updateLiveScore();
 }
 
 function updateVehicles() {
-  vehicles = vehicles.filter(v => v.y > -80 && v.y < H + 80);
+  if (strikesCooldown>0) strikesCooldown--;
+  vehicles=vehicles.filter(v=>v.y>-80&&v.y<H+80);
   vehicles.forEach(v => {
-    v.y += v.vy;
+    v.y+=v.vy;
 
-    // Check collision with human
-    const hdx = human.x - v.x, hdy = human.y - v.y;
-    if (Math.abs(hdx) < v.w/2 + 10 && Math.abs(hdy) < v.h/2 + 10) {
-      triggerCollision('person');
-      return;
-    }
-
-    // Check collision with each unsecured cow
-    cattle.forEach(cow => {
-      if (cow.state === 'secured' || cow.hit) return;
-      const cdx = cow.x - v.x, cdy = cow.y - v.y;
-      if (Math.abs(cdx) < v.w/2 + cow.size * 0.5 && Math.abs(cdy) < v.h/2 + cow.size * 0.5) {
-        cow.hit = true;
-        triggerCollision('animal');
+    if (strikesCooldown===0) {
+      // Human collision
+      const hdx=human.x-v.x, hdy=human.y-v.y;
+      if (Math.abs(hdx)<v.w/2+10&&Math.abs(hdy)<v.h/2+10) {
+        applyStrike('person'); return;
       }
-    });
+      // Cattle collision
+      cattle.forEach(cow => {
+        if (cow.state==='secured'||cow.hit) return;
+        const cdx=cow.x-v.x, cdy=cow.y-v.y;
+        if (Math.abs(cdx)<v.w/2+cow.size*0.5&&Math.abs(cdy)<v.h/2+cow.size*0.5) {
+          cow.hit=true;
+          applyStrike('animal');
+        }
+      });
+    }
   });
 }
 
-let flashTimer = 0;
-
-function triggerCollision(type) {
+function applyStrike(type) {
   if (!gameActive) return;
-  flashTimer = 18; // frames of red flash
-  hitType = type;
-  endGame('hit');
+  strikeCount++;
+  strikesCooldown=80; // ~1.3s grace period before next strike registers
+  flashTimer=22;
+  hitType=type;
+  const penalty=PTS_STRIKE;
+  liveScore=Math.max(0, liveScore+penalty);
+  document.getElementById('livescore').textContent=Math.round(liveScore);
+  const who=type==='person'?'You were struck':'An animal was struck';
+  showMsg(`⚠ ${who} by a vehicle! ${penalty} pts`);
 }
-
-let hitType = '';
 
 function updateStressUI() {
-  const s = herdStress / 10;
-  const bar = document.getElementById('stress-bar');
-  const lbl = document.getElementById('stlvl');
-  if (s < 0.2) { bar.style.background='rgba(0,0,0,0)'; lbl.textContent='Low';    lbl.style.color='#f0c040'; }
-  else if (s < 0.5) { bar.style.background='rgba(230,126,34,0.7)'; lbl.textContent='Medium'; lbl.style.color='#e67e22'; }
-  else              { bar.style.background='rgba(231,76,60,0.85)';  lbl.textContent='HIGH';   lbl.style.color='#e74c3c'; }
+  const s=herdStress/10;
+  const bar=document.getElementById('stress-bar');
+  const lbl=document.getElementById('stlvl');
+  if (s<0.2) { bar.style.background='rgba(0,0,0,0)'; lbl.textContent='Low';    lbl.style.color='#f0c040'; }
+  else if (s<0.5) { bar.style.background='rgba(230,126,34,0.7)'; lbl.textContent='Medium'; lbl.style.color='#e67e22'; }
+  else            { bar.style.background='rgba(231,76,60,0.85)';  lbl.textContent='HIGH';   lbl.style.color='#e74c3c'; }
 }
 
+// ── Draw ────────────────────────────────────────────────────────
 function drawScene(level) {
-  ctx.clearRect(0, 0, W, H);
-  const isNight = level.name.includes('Night');
-
-  ctx.fillStyle = isNight ? '#1a2a0a' : '#4a7a30';
-  ctx.fillRect(0, 0, W, H);
+  ctx.clearRect(0,0,W,H);
+  const isNight=level.name.includes('Night');
+  ctx.fillStyle=isNight?'#1a2a0a':'#4a7a30';
+  ctx.fillRect(0,0,W,H);
 
   if (!isNight) {
-    ctx.fillStyle = '#3d6628';
-    for (let gx = 0; gx < ROAD_X; gx += 28)
-      for (let gy = 42; gy < H; gy += 22)
-        ctx.fillRect(gx + (gy % 56 < 28 ? 3 : 0), gy, 10, 2);
-    for (let gx = ROAD_X + ROAD_W; gx < W; gx += 28)
-      for (let gy = 42; gy < H; gy += 22)
-        ctx.fillRect(gx + (gy % 56 < 28 ? 3 : 0), gy, 10, 2);
+    ctx.fillStyle='#3d6628';
+    for (let gx=0;gx<ROAD_X;gx+=28) for (let gy=42;gy<H;gy+=22) ctx.fillRect(gx+(gy%56<28?3:0),gy,10,2);
+    for (let gx=ROAD_X+ROAD_W;gx<W;gx+=28) for (let gy=42;gy<H;gy+=22) ctx.fillRect(gx+(gy%56<28?3:0),gy,10,2);
   }
-
   if (isNight) {
-    const grad = ctx.createRadialGradient(human.x, human.y, 10, human.x, human.y, 160);
-    grad.addColorStop(0, 'rgba(255,240,180,0.18)');
-    grad.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, H);
+    const grad=ctx.createRadialGradient(human.x,human.y,10,human.x,human.y,160);
+    grad.addColorStop(0,'rgba(255,240,180,0.18)'); grad.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
   }
 
-  ctx.fillStyle = isNight ? '#3a3a3a' : '#555';
-  ctx.fillRect(ROAD_X, 0, ROAD_W, H);
-
-  ctx.setLineDash([28, 16]);
-  ctx.strokeStyle = '#ffef99'; ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.moveTo(ROAD_X + ROAD_W/2, 0); ctx.lineTo(ROAD_X + ROAD_W/2, H); ctx.stroke();
+  ctx.fillStyle=isNight?'#3a3a3a':'#555';
+  ctx.fillRect(ROAD_X,0,ROAD_W,H);
+  ctx.setLineDash([28,16]); ctx.strokeStyle='#ffef99'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(ROAD_X+ROAD_W/2,0); ctx.lineTo(ROAD_X+ROAD_W/2,H); ctx.stroke();
   ctx.setLineDash([]);
-
-  ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(ROAD_X, 0); ctx.lineTo(ROAD_X, H); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(ROAD_X + ROAD_W, 0); ctx.lineTo(ROAD_X + ROAD_W, H); ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,0.3)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(ROAD_X,0); ctx.lineTo(ROAD_X,H); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ROAD_X+ROAD_W,0); ctx.lineTo(ROAD_X+ROAD_W,H); ctx.stroke();
 
   drawTruck();
-  vehicles.forEach(v => drawVehicle(v, isNight));
+  vehicles.forEach(v=>drawVehicle(v,isNight));
 
-  zones.forEach((z, i) => {
-    const blocked = gates.find(g => g.zoneIdx === i && !g.open);
-    ctx.strokeStyle = blocked ? 'rgba(231,76,60,0.6)' : 'rgba(255,255,255,0.45)';
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([7, 5]);
-    ctx.strokeRect(z.x, z.y, z.w, z.h);
-    ctx.setLineDash([]);
-    ctx.fillStyle = blocked ? 'rgba(231,76,60,0.05)' : 'rgba(255,255,255,0.05)';
-    ctx.fillRect(z.x, z.y, z.w, z.h);
-    ctx.fillStyle = blocked ? 'rgba(231,76,60,0.55)' : 'rgba(255,255,255,0.55)';
-    ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(blocked ? 'LOCKED' : 'SAFE', z.x + z.w/2, z.y + z.h/2);
+  zones.forEach((z,i)=>{
+    const blocked=gates.find(g=>g.zoneIdx===i&&!g.open);
+    ctx.strokeStyle=blocked?'rgba(231,76,60,0.6)':'rgba(255,255,255,0.45)';
+    ctx.lineWidth=1.5; ctx.setLineDash([7,5]);
+    ctx.strokeRect(z.x,z.y,z.w,z.h); ctx.setLineDash([]);
+    ctx.fillStyle=blocked?'rgba(231,76,60,0.05)':'rgba(255,255,255,0.05)';
+    ctx.fillRect(z.x,z.y,z.w,z.h);
+    ctx.fillStyle=blocked?'rgba(231,76,60,0.55)':'rgba(255,255,255,0.55)';
+    ctx.font='10px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(blocked?'LOCKED':'SAFE',z.x+z.w/2,z.y+z.h/2);
   });
 
-  gates.forEach(g => drawGate(g));
-  cattle.forEach(cow => drawCow(cow, isNight));
+  gates.forEach(g=>drawGate(g));
+  cattle.forEach(cow=>drawCow(cow,isNight));
   drawHuman(level);
 
-  // Red impact flash
-  if (flashTimer > 0) {
-    ctx.fillStyle = `rgba(220,30,30,${(flashTimer / 18) * 0.55})`;
-    ctx.fillRect(0, 0, W, H);
+  if (flashTimer>0) {
+    ctx.fillStyle=`rgba(220,30,30,${(flashTimer/22)*0.5})`;
+    ctx.fillRect(0,0,W,H);
     flashTimer--;
   }
 }
 
 function drawTruck() {
-  ctx.save();
-  ctx.translate(ROAD_X + ROAD_W/2, H * 0.44);
-  ctx.rotate(-0.22);
-  ctx.fillStyle = '#c0392b'; ctx.fillRect(-50,-22,104,44);
-  ctx.fillStyle = '#e74c3c'; ctx.fillRect(-45,-17,94,34);
-  ctx.fillStyle = 'rgba(255,255,255,0.55)';
-  ctx.font = 'bold 8px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('LIVESTOCK', 0, 4);
-  ctx.fillStyle = '#d35400'; ctx.fillRect(-84,-18,38,40);
-  ctx.fillStyle = '#85c1e9'; ctx.fillRect(-80,-13,22,16);
-  [[-64,20],[2,23],[52,20]].forEach(([wx,wy]) => {
-    ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(wx,wy,9,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#666'; ctx.beginPath(); ctx.arc(wx,wy,4,0,Math.PI*2); ctx.fill();
+  ctx.save(); ctx.translate(ROAD_X+ROAD_W/2,H*0.44); ctx.rotate(-0.22);
+  ctx.fillStyle='#c0392b'; ctx.fillRect(-50,-22,104,44);
+  ctx.fillStyle='#e74c3c'; ctx.fillRect(-45,-17,94,34);
+  ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.font='bold 8px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('LIVESTOCK',0,4);
+  ctx.fillStyle='#d35400'; ctx.fillRect(-84,-18,38,40);
+  ctx.fillStyle='#85c1e9'; ctx.fillRect(-80,-13,22,16);
+  [[-64,20],[2,23],[52,20]].forEach(([wx,wy])=>{
+    ctx.fillStyle='#222'; ctx.beginPath(); ctx.arc(wx,wy,9,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#666'; ctx.beginPath(); ctx.arc(wx,wy,4,0,Math.PI*2); ctx.fill();
   });
   ctx.restore();
 }
 
-function drawVehicle(v, isNight) {
-  ctx.save();
-  ctx.translate(v.x, v.y);
+function drawVehicle(v,isNight) {
+  ctx.save(); ctx.translate(v.x,v.y);
   if (isNight) {
-    const lightDir = v.vy > 0 ? 1 : -1;
-    const lg = ctx.createRadialGradient(0, lightDir*30, 2, 0, lightDir*30, 90);
-    lg.addColorStop(0, 'rgba(255,240,180,0.25)');
-    lg.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = lg;
-    ctx.fillRect(-60, lightDir > 0 ? 20 : -110, 120, 90);
+    const ld=v.vy>0?1:-1;
+    const lg=ctx.createRadialGradient(0,ld*30,2,0,ld*30,90);
+    lg.addColorStop(0,'rgba(255,240,180,0.25)'); lg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=lg; ctx.fillRect(-60,ld>0?20:-110,120,90);
   }
-  ctx.fillStyle = v.color;
-  roundRect(-v.w/2, -v.h/2, v.w, v.h, 4);
-  ctx.fill();
-  ctx.fillStyle = 'rgba(255,255,255,0.4)';
-  ctx.fillRect(-v.w/2+4, -v.h/2+4, v.w-8, 10);
-  ctx.fillStyle = isNight ? '#fffaaa' : 'rgba(255,255,200,0.7)';
-  [-7, 7].forEach(ox => {
-    ctx.beginPath();
-    ctx.arc(ox, v.vy > 0 ? v.h/2-4 : -v.h/2+4, 3, 0, Math.PI*2);
-    ctx.fill();
-  });
+  ctx.fillStyle=v.color; roundRect(-v.w/2,-v.h/2,v.w,v.h,4); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.fillRect(-v.w/2+4,-v.h/2+4,v.w-8,10);
+  ctx.fillStyle=isNight?'#fffaaa':'rgba(255,255,200,0.7)';
+  [-7,7].forEach(ox=>{ ctx.beginPath(); ctx.arc(ox,v.vy>0?v.h/2-4:-v.h/2+4,3,0,Math.PI*2); ctx.fill(); });
   ctx.restore();
 }
 
 function drawGate(g) {
-  const z = zones[g.zoneIdx];
-  const gx = z.x + z.w / 2;
-  const gy = z.y;
+  const z=zones[g.zoneIdx], gx=z.x+z.w/2, gy=z.y;
   ctx.save();
   if (!g.open) {
-    ctx.fillStyle = '#f0c040';
-    ctx.fillRect(gx-20, gy-4, 40, 7);
-    ctx.fillStyle = '#8b6914';
-    ctx.fillRect(gx-22, gy-6, 5, 11);
-    ctx.fillRect(gx+17, gy-6, 5, 11);
-    ctx.fillStyle = 'rgba(255,255,255,0.8)';
-    ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('tap to open', gx, gy-9);
+    ctx.fillStyle='#f0c040'; ctx.fillRect(gx-20,gy-4,40,7);
+    ctx.fillStyle='#8b6914'; ctx.fillRect(gx-22,gy-6,5,11); ctx.fillRect(gx+17,gy-6,5,11);
+    ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.font='9px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('tap to open',gx,gy-9);
   } else {
-    ctx.fillStyle = 'rgba(240,192,64,0.35)';
-    ctx.fillRect(gx+17, gy-16, 7, 40);
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('open', gx, gy-9);
+    ctx.fillStyle='rgba(240,192,64,0.35)'; ctx.fillRect(gx+17,gy-16,7,40);
+    ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font='9px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('open',gx,gy-9);
   }
   ctx.restore();
 }
 
-function drawCow(cow, isNight) {
-  if (isNight) {
-    const d = Math.sqrt((cow.x-human.x)**2 + (cow.y-human.y)**2);
-    if (d > 155 && cow.state !== 'flee') return;
-  }
-  ctx.save();
-  ctx.translate(cow.x, cow.y);
-  ctx.rotate(cow.angle + Math.PI/2);
-
-  const sz = cow.size;
-  const wb = Math.sin(cow.wobble) * (cow.state === 'flee' ? 0.11 : 0.03);
-  let ring = '#f0c040';
-  if (cow.state==='alert')   ring = '#e67e22';
-  if (cow.state==='flee')    ring = '#e74c3c';
-  if (cow.state==='secured') ring = '#8e44ad';
-
-  ctx.strokeStyle = ring; ctx.lineWidth = 1.8;
-  ctx.beginPath(); ctx.arc(0,0,sz+3,0,Math.PI*2); ctx.stroke();
-
-  ctx.fillStyle = cow.color;
-  ctx.beginPath(); ctx.ellipse(0,0,sz*0.54,sz*0.37,wb,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle = '#5a3a1a'; ctx.lineWidth = 0.7; ctx.stroke();
-
-  ctx.fillStyle = cow.color;
-  ctx.beginPath(); ctx.ellipse(0,-sz*0.44,sz*0.27,sz*0.23,wb,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle = '#5a3a1a'; ctx.lineWidth = 0.7; ctx.stroke();
-
-  ctx.fillStyle = '#111';
+function drawCow(cow,isNight) {
+  if (isNight) { const d=Math.sqrt((cow.x-human.x)**2+(cow.y-human.y)**2); if (d>155&&cow.state!=='flee') return; }
+  ctx.save(); ctx.translate(cow.x,cow.y); ctx.rotate(cow.angle+Math.PI/2);
+  const sz=cow.size, wb=Math.sin(cow.wobble)*(cow.state==='flee'?0.11:0.03);
+  let ring='#f0c040';
+  if (cow.state==='alert') ring='#e67e22';
+  if (cow.state==='flee')  ring='#e74c3c';
+  if (cow.state==='secured') ring='#8e44ad';
+  ctx.strokeStyle=ring; ctx.lineWidth=1.8; ctx.beginPath(); ctx.arc(0,0,sz+3,0,Math.PI*2); ctx.stroke();
+  ctx.fillStyle=cow.color; ctx.beginPath(); ctx.ellipse(0,0,sz*0.54,sz*0.37,wb,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#5a3a1a'; ctx.lineWidth=0.7; ctx.stroke();
+  ctx.fillStyle=cow.color; ctx.beginPath(); ctx.ellipse(0,-sz*0.44,sz*0.27,sz*0.23,wb,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#5a3a1a'; ctx.lineWidth=0.7; ctx.stroke();
+  ctx.fillStyle='#111';
   ctx.beginPath(); ctx.arc(-sz*0.09,-sz*0.48,1.6,0,Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc( sz*0.09,-sz*0.48,1.6,0,Math.PI*2); ctx.fill();
-
-  ctx.fillStyle = '#ffbbaa';
-  ctx.beginPath(); ctx.ellipse(0,-sz*0.34,sz*0.11,sz*0.07,0,0,Math.PI*2); ctx.fill();
-
-  ctx.fillStyle = '#ffccaa';
+  ctx.fillStyle='#ffbbaa'; ctx.beginPath(); ctx.ellipse(0,-sz*0.34,sz*0.11,sz*0.07,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#ffccaa';
   ctx.beginPath(); ctx.ellipse(-sz*0.19,-sz*0.54,sz*0.09,sz*0.055,-0.4,0,Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.ellipse( sz*0.19,-sz*0.54,sz*0.09,sz*0.055, 0.4,0,Math.PI*2); ctx.fill();
-
-  const legWobble = cow.state !== 'secured' ? Math.sin(cow.wobble*2)*2.8 : 0;
-  ctx.strokeStyle = cow.color; ctx.lineWidth = sz*0.17;
-  [[-sz*0.28,sz*0.24],[sz*0.28,sz*0.24],[-sz*0.2,-sz*0.14],[sz*0.2,-sz*0.14]].forEach(([lx,ly],i) => {
-    ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(lx+(i%2===0?-legWobble:legWobble),ly+sz*0.3); ctx.stroke();
+  const lw=cow.state!=='secured'?Math.sin(cow.wobble*2)*2.8:0;
+  ctx.strokeStyle=cow.color; ctx.lineWidth=sz*0.17;
+  [[-sz*0.28,sz*0.24],[sz*0.28,sz*0.24],[-sz*0.2,-sz*0.14],[sz*0.2,-sz*0.14]].forEach(([lx,ly],i)=>{
+    ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(lx+(i%2===0?-lw:lw),ly+sz*0.3); ctx.stroke();
   });
-
-  ctx.strokeStyle = cow.color; ctx.lineWidth = 1.8;
+  ctx.strokeStyle=cow.color; ctx.lineWidth=1.8;
   ctx.beginPath(); ctx.moveTo(0,sz*0.37); ctx.quadraticCurveTo(sz*0.28,sz*0.52,sz*0.14,sz*0.68); ctx.stroke();
   ctx.restore();
-
-  if (cow.state === 'flee') {
-    ctx.save();
-    ctx.translate(cow.x, cow.y - cow.size - 7);
-    ctx.fillStyle = '#e74c3c'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('!', 0, 0);
-    ctx.restore();
+  if (cow.state==='flee') {
+    ctx.save(); ctx.translate(cow.x,cow.y-cow.size-7);
+    ctx.fillStyle='#e74c3c'; ctx.font='bold 10px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('!',0,0); ctx.restore();
   }
 }
 
 function drawHuman(level) {
-  const hSpeed = Math.sqrt(human.vx*human.vx + human.vy*human.vy);
-  const sr = Math.min(1, hSpeed/8);
-  const fz = 75 + hSpeed*11;
-
-  ctx.strokeStyle = `rgba(255,200,60,${0.13+sr*0.18})`;
-  ctx.lineWidth = 1; ctx.setLineDash([4,4]);
-  ctx.beginPath(); ctx.arc(human.x,human.y,fz,0,Math.PI*2); ctx.stroke();
-  ctx.setLineDash([]);
-
+  const hSpeed=Math.sqrt(human.vx*human.vx+human.vy*human.vy), sr=Math.min(1,hSpeed/8);
+  const fz=75+hSpeed*11;
+  ctx.strokeStyle=`rgba(255,200,60,${0.13+sr*0.18})`; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.arc(human.x,human.y,fz,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
   if (level.name.includes('Night')) {
-    const tg = ctx.createRadialGradient(human.x,human.y,5,human.x,human.y,fz*0.7);
+    const tg=ctx.createRadialGradient(human.x,human.y,5,human.x,human.y,fz*0.7);
     tg.addColorStop(0,'rgba(255,240,180,0.1)'); tg.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle = tg; ctx.beginPath(); ctx.arc(human.x,human.y,fz*0.7,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=tg; ctx.beginPath(); ctx.arc(human.x,human.y,fz*0.7,0,Math.PI*2); ctx.fill();
   }
-
-  const bc = `rgb(${Math.round(60+sr*195)},${Math.round(160-sr*100)},${Math.round(200-sr*150)})`;
-  ctx.fillStyle = bc;
-  ctx.beginPath(); ctx.arc(human.x,human.y,11,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.8; ctx.stroke();
-
-  ctx.fillStyle = '#f5d0a9';
-  ctx.beginPath(); ctx.arc(human.x,human.y-13,6,0,Math.PI*2); ctx.fill();
-
-  ctx.strokeStyle = '#f0c040'; ctx.lineWidth = 2.5;
+  const bc=`rgb(${Math.round(60+sr*195)},${Math.round(160-sr*100)},${Math.round(200-sr*150)})`;
+  ctx.fillStyle=bc; ctx.beginPath(); ctx.arc(human.x,human.y,11,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#fff'; ctx.lineWidth=1.8; ctx.stroke();
+  ctx.fillStyle='#f5d0a9'; ctx.beginPath(); ctx.arc(human.x,human.y-13,6,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#f0c040'; ctx.lineWidth=2.5;
   ctx.beginPath(); ctx.moveTo(human.x-7,human.y-3); ctx.lineTo(human.x+7,human.y-3); ctx.stroke();
-
-  if (hSpeed > 1.5) {
-    ctx.fillStyle = `rgba(231,76,60,${Math.min(1,sr*1.3)})`;
-    ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('FAST', human.x, human.y-22);
+  if (hSpeed>1.5) {
+    ctx.fillStyle=`rgba(231,76,60,${Math.min(1,sr*1.3)})`;
+    ctx.font='bold 9px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('FAST',human.x,human.y-22);
   }
 }
 
 function gameLoop(level) {
   if (!gameActive) return;
-  human.vx = (human.x - human.px) * 0.65;
-  human.vy = (human.y - human.py) * 0.65;
-  human.px = human.x; human.py = human.y;
-  updateCattle(level);
-  updateVehicles();
-  drawScene(level);
-  animFrame = requestAnimationFrame(() => gameLoop(level));
+  human.vx=(human.x-human.px)*0.65; human.vy=(human.y-human.py)*0.65;
+  human.px=human.x; human.py=human.y;
+  updateCattle(level); updateVehicles(); drawScene(level);
+  animFrame=requestAnimationFrame(()=>gameLoop(level));
 }
 
-wrap.addEventListener('mousemove', e => {
-  if (!gameActive) return;
-  const r = wrap.getBoundingClientRect();
-  human.x = e.clientX - r.left;
-  human.y = e.clientY - r.top;
+// ── Input ───────────────────────────────────────────────────────
+wrap.addEventListener('mousemove',e=>{ if(!gameActive)return; const r=wrap.getBoundingClientRect(); human.x=e.clientX-r.left; human.y=e.clientY-r.top; });
+wrap.addEventListener('touchmove',e=>{ if(!gameActive)return; e.preventDefault(); const r=wrap.getBoundingClientRect(); human.x=e.touches[0].clientX-r.left; human.y=e.touches[0].clientY-r.top; },{passive:false});
+
+wrap.addEventListener('click',e=>{
+  if (!gameActive||!gates.length) return;
+  const r=wrap.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
+  gates.forEach(g=>{ if(g.open)return; const z=zones[g.zoneIdx],gx=z.x+z.w/2; if(mx>gx-28&&mx<gx+28&&my>z.y-18&&my<z.y+14){g.open=true;showMsg('Gate open — herd them in!');} });
 });
-
-wrap.addEventListener('touchmove', e => {
-  if (!gameActive) return;
-  e.preventDefault();
-  const r = wrap.getBoundingClientRect();
-  human.x = e.touches[0].clientX - r.left;
-  human.y = e.touches[0].clientY - r.top;
-}, {passive: false});
-
-// Gate click handler
-wrap.addEventListener('click', e => {
-  if (!gameActive || !gates.length) return;
-  const r = wrap.getBoundingClientRect();
-  const mx = e.clientX - r.left, my = e.clientY - r.top;
-  gates.forEach(g => {
-    if (g.open) return;
-    const z = zones[g.zoneIdx];
-    const gx = z.x + z.w/2;
-    if (mx > gx-28 && mx < gx+28 && my > z.y-18 && my < z.y+14) {
-      g.open = true;
-      showMsg('Gate open — herd them in!');
-    }
-  });
-});
-
-wrap.addEventListener('touchstart', e => {
-  if (!gameActive || !gates.length) return;
-  const r = wrap.getBoundingClientRect();
-  const mx = e.touches[0].clientX - r.left, my = e.touches[0].clientY - r.top;
-  gates.forEach(g => {
-    if (g.open) return;
-    const z = zones[g.zoneIdx];
-    const gx = z.x + z.w/2;
-    if (mx > gx-34 && mx < gx+34 && my > z.y-22 && my < z.y+18) {
-      g.open = true;
-      showMsg('Gate open — herd them in!');
-    }
-  });
-}, {passive: true});
+wrap.addEventListener('touchstart',e=>{
+  if (!gameActive||!gates.length) return;
+  const r=wrap.getBoundingClientRect(), mx=e.touches[0].clientX-r.left, my=e.touches[0].clientY-r.top;
+  gates.forEach(g=>{ if(g.open)return; const z=zones[g.zoneIdx],gx=z.x+z.w/2; if(mx>gx-34&&mx<gx+34&&my>z.y-22&&my<z.y+18){g.open=true;showMsg('Gate open — herd them in!');} });
+},{passive:true});
 
 function showMsg(txt) {
-  const m = document.getElementById('msg');
-  m.textContent = txt; m.style.opacity = '1';
-  clearTimeout(m._t);
-  m._t = setTimeout(() => m.style.opacity = '0', 1500);
+  const m=document.getElementById('msg'); m.textContent=txt; m.style.opacity='1';
+  clearTimeout(m._t); m._t=setTimeout(()=>m.style.opacity='0',1600);
 }
 
+// ── Start / End ─────────────────────────────────────────────────
 function startLevel(idx) {
-  cancelAnimationFrame(animFrame);
-  clearInterval(timerInt);
-  clearInterval(trafficTimer);
-  currentLevel = idx;
-  const level = LEVELS[idx];
-  score = 0; timer = level.time; gameActive = true;
-  vehicles = []; gates = [];
-  document.getElementById('sc').textContent = 0;
-  document.getElementById('clk').textContent = timer;
-  document.getElementById('lvlname').textContent = level.name;
-  document.getElementById('overlay').style.display = 'none';
-  resize();
-  buildZones(level);
-  spawnCattle(level.cattle);
-  document.getElementById('tot').textContent = level.cattle;
-  human.x = W/2; human.y = H * 0.82;
-  human.px = human.x; human.py = human.y;
+  cancelAnimationFrame(animFrame); clearInterval(timerInt); clearInterval(trafficTimer);
+  currentLevel=idx;
+  const level=LEVELS[idx];
+  cattleSecured=0; timer=level.time; gameActive=true;
+  vehicles=[]; gates=[];
+  // Reset scoring
+  liveScore=0; stressPenaltyAccum=0; strikeCount=0; strikesCooldown=0;
+  document.getElementById('sc').textContent=0;
+  document.getElementById('clk').textContent=timer;
+  document.getElementById('lvlname').textContent=level.name;
+  document.getElementById('livescore').textContent=0;
+  document.getElementById('overlay').style.display='none';
+  resize(); buildZones(level); spawnCattle(level.cattle);
+  document.getElementById('tot').textContent=level.cattle;
+  human.x=W/2; human.y=H*0.82; human.px=human.x; human.py=human.y;
 
   if (level.trafficFreq) {
-    trafficTimer = setInterval(() => {
-      if (gameActive) spawnVehicle(level);
-    }, level.trafficFreq);
+    trafficTimer=setInterval(()=>{ if(gameActive) spawnVehicle(level); }, level.trafficFreq);
   }
-
-  // BUG FIX: guard against endGame(false) firing after endGame(true) already ended the game
-  timerInt = setInterval(() => {
+  timerInt=setInterval(()=>{
     if (!gameActive) { clearInterval(timerInt); return; }
     timer--;
-    document.getElementById('clk').textContent = timer;
-    if (timer <= 0) endGame(false);
-  }, 1000);
+    document.getElementById('clk').textContent=timer;
+    if (timer<=0) endGame(false);
+  },1000);
 
   buildPills(idx);
   gameLoop(level);
@@ -659,98 +597,114 @@ function startLevel(idx) {
 
 function endGame(won) {
   if (!gameActive) return;
-  clearInterval(timerInt);
-  clearInterval(trafficTimer);
-  cancelAnimationFrame(animFrame);
-  gameActive = false;
+  clearInterval(timerInt); clearInterval(trafficTimer); cancelAnimationFrame(animFrame);
+  gameActive=false;
 
-  if (won === true && !completedLevels.includes(currentLevel)) completedLevels.push(currentLevel);
-  const level = LEVELS[currentLevel];
-  const pct = score / level.cattle;
-  let msg, sub, stars;
+  const level=LEVELS[currentLevel];
 
-  if (won === 'hit') {
-    const who = hitType === 'person' ? 'You were struck by a vehicle' : 'An animal was struck by a vehicle';
-    msg = 'Incident — attempt ended';
-    sub = `${who}. Stay well clear of moving traffic during a livestock incident. ${score} of ${level.cattle} cattle had been secured.`;
-    stars = '✕';
-  } else if (won === true) {
-    msg = 'Level complete!';
-    sub = `All ${level.cattle} cattle secured. Outstanding stock handling.`;
-    stars = '★★★';
-  } else if (pct >= 0.7) {
-    msg = "Time's up — well done";
-    sub = `${score}/${level.cattle} secured. Solid flight zone awareness.`;
-    stars = '★★☆';
-  } else if (pct >= 0.4) {
-    msg = "Time's up — keep practising";
-    sub = `${score}/${level.cattle} secured. Try slower, wider movements.`;
-    stars = '★☆☆';
-  } else {
-    msg = "Time's up — review technique";
-    sub = `${score}/${level.cattle} secured. Fast movement caused panic.`;
-    stars = '☆☆☆';
+  // Final score calculation
+  let timeBonus=0, allBonus=0;
+  if (won===true) {
+    allBonus=PTS_ALL_SECURED;
+    timeBonus=timer*PTS_TIME_BONUS;
+    liveScore+=timeBonus+allBonus;
   }
+  const finalScore=Math.max(0,Math.round(liveScore));
 
-  const nextIdx = currentLevel + 1;
-  const hasNext = nextIdx < LEVELS.length;
-  let btns = `<button class="btn" onclick="startLevel(${currentLevel})">Retry</button>`;
-  if (won === true && hasNext) btns += `<button class="btn" onclick="startLevel(${nextIdx})">Next level →</button>`;
+  // Stars
+  const pct=cattleSecured/level.cattle;
+  let stars;
+  if (won===true)  stars='★★★';
+  else if (pct>=0.7) stars='★★☆';
+  else if (pct>=0.4) stars='★☆☆';
+  else               stars='☆☆☆';
 
-  const ov = document.getElementById('overlay');
-  ov.style.display = 'flex';
-  const starColor = won === 'hit' ? '#e74c3c' : '#f0c040';
-  ov.innerHTML = `
+  if (won===true && !completedLevels.includes(currentLevel)) completedLevels.push(currentLevel);
+
+  // Save to scoreboard
+  const playerName=document.getElementById('player-name').value.trim()||'Handler';
+  scoreboard.push({ name:playerName, score:finalScore, level:level.name.split('·')[1]?.trim()||level.name, stars, date:new Date().toLocaleTimeString() });
+  scoreboard.sort((a,b)=>b.score-a.score);
+  if (scoreboard.length>10) scoreboard.length=10;
+  renderScoreboard();
+
+  // Build score breakdown
+  const animPts=cattleSecured*PTS_PER_ANIMAL;
+  const stressPen=Math.round(stressPenaltyAccum);
+  const strikePen=strikeCount*PTS_STRIKE;
+
+  let msg, sub;
+  if (won===true) { msg='Level complete!'; sub='All animals secured — excellent stock handling.'; }
+  else if (pct>=0.7) { msg="Time's up — well done"; sub=`${cattleSecured}/${level.cattle} secured. Solid technique.`; }
+  else if (pct>=0.4) { msg="Time's up — keep practising"; sub=`${cattleSecured}/${level.cattle} secured. Focus on slower movement.`; }
+  else { msg="Time's up — review technique"; sub=`${cattleSecured}/${level.cattle} secured. Fast movement caused panic.`; }
+
+  const nextIdx=currentLevel+1, hasNext=nextIdx<LEVELS.length;
+  let btns=`<button class="btn" onclick="startLevel(${currentLevel})">Retry</button>`;
+  if (won===true&&hasNext) btns+=`<button class="btn" onclick="startLevel(${nextIdx})">Next level →</button>`;
+
+  const ov=document.getElementById('overlay');
+  ov.style.display='flex';
+  ov.innerHTML=`
     <h2>${msg}</h2>
-    <p style="color:${starColor};font-size:20px;letter-spacing:3px;margin:0">${stars}</p>
+    <p style="color:#f0c040;font-size:18px;letter-spacing:3px;margin:0">${stars}</p>
     <p class="sub">${sub}</p>
+    <div class="score-breakdown">
+      <div class="sb-row"><span>Animals secured (×${PTS_PER_ANIMAL})</span><span class="pos">+${animPts}</span></div>
+      ${won===true?`<div class="sb-row"><span>Time bonus (${timer}s × ${PTS_TIME_BONUS})</span><span class="pos">+${timeBonus}</span></div>`:''}
+      ${won===true?`<div class="sb-row"><span>All animals bonus</span><span class="pos">+${allBonus}</span></div>`:''}
+      <div class="sb-row"><span>Stress penalty</span><span class="neg">${stressPen}</span></div>
+      <div class="sb-row"><span>Vehicle strikes (×${strikeCount})</span><span class="neg">${strikePen}</span></div>
+      <div class="sb-row total"><span>Final score</span><span>${finalScore}</span></div>
+    </div>
     <div class="level-pills" id="pillrow2"></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">${btns}<button class="btn-ghost" onclick="showMenu()">Level select</button></div>
   `;
   buildPills2();
 }
 
+function renderScoreboard() {
+  const list=document.getElementById('sb-list');
+  if (!scoreboard.length) { list.innerHTML='<p class="sb-empty">No scores yet</p>'; return; }
+  list.innerHTML=scoreboard.map((e,i)=>`
+    <div class="sb-entry rank-${i+1}">
+      <div class="sb-name"><span>${i+1}. ${e.name}</span><span class="sb-pts">${e.score}</span></div>
+      <div class="sb-detail">${e.level} · ${e.stars} · ${e.date}</div>
+    </div>`).join('');
+}
+
 function buildPills(activeIdx) {
-  const pr = document.getElementById('pillrow');
-  if (!pr) return;
-  pr.innerHTML = LEVELS.map((l,i) =>
-    `<span class="pill ${completedLevels.includes(i)?'done':''} ${i===activeIdx?'active':''}">${l.name.split('·')[0].trim()}</span>`
-  ).join('');
+  const pr=document.getElementById('pillrow'); if(!pr)return;
+  pr.innerHTML=LEVELS.map((l,i)=>`<span class="pill ${completedLevels.includes(i)?'done':''} ${i===activeIdx?'active':''}">${l.name.split('·')[0].trim()}</span>`).join('');
 }
-
 function buildPills2() {
-  const pr = document.getElementById('pillrow2');
-  if (!pr) return;
-  pr.innerHTML = LEVELS.map((l,i) =>
-    `<span class="pill ${completedLevels.includes(i)?'done':''} ${i===currentLevel?'active':''}" style="cursor:pointer" onclick="startLevel(${i})">${l.name.split('·')[0].trim()}</span>`
-  ).join('');
+  const pr=document.getElementById('pillrow2'); if(!pr)return;
+  pr.innerHTML=LEVELS.map((l,i)=>`<span class="pill ${completedLevels.includes(i)?'done':''} ${i===currentLevel?'active':''}" style="cursor:pointer" onclick="startLevel(${i})">${l.name.split('·')[0].trim()}</span>`).join('');
 }
-
 function showMenu() {
-  const ov = document.getElementById('overlay');
-  ov.style.display = 'flex';
-  ov.innerHTML = `
+  const ov=document.getElementById('overlay'); ov.style.display='flex';
+  ov.innerHTML=`
     <h2>Select a level</h2>
     <div style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:300px;">
-      ${LEVELS.map((l,i) => `
-        <button style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,${completedLevels.includes(i)?'0.3':'0.1'});border-radius:8px;padding:8px 14px;cursor:pointer;color:#fff;font-size:12px;width:100%;" onclick="startLevel(${i})">
-          <span>${l.name}</span>
-          <span style="color:#f0c040;font-size:10px;">${completedLevels.includes(i)?'★ done':''}</span>
-        </button>`).join('')}
+      ${LEVELS.map((l,i)=>`<button style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,${completedLevels.includes(i)?'0.3':'0.1'});border-radius:8px;padding:8px 14px;cursor:pointer;color:#fff;font-size:12px;width:100%;" onclick="startLevel(${i})"><span>${l.name}</span><span style="color:#f0c040;font-size:10px;">${completedLevels.includes(i)?'★ done':''}</span></button>`).join('')}
+    </div>
+    <div id="name-input-wrap" style="width:100%;max-width:300px;">
+      <label style="font-size:10px;color:rgba(255,255,255,0.5);">Your name</label>
+      <input id="player-name" type="text" maxlength="18" placeholder="Handler name…" value="${document.getElementById('player-name')?.value||'Handler'}" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:5px 8px;color:#fff;font-size:12px;width:100%;outline:none;margin-top:4px;">
     </div>
     <button class="btn-ghost" style="margin-top:4px" onclick="startLevel(0)">Start from level 1</button>
   `;
 }
 
-window.startLevel = startLevel;
-window.showMenu = showMenu;
+window.startLevel=startLevel;
+window.showMenu=showMenu;
 
 // Init
 resize();
-window.addEventListener('resize', () => { if (!gameActive) resize(); });
+window.addEventListener('resize',()=>{ if(!gameActive) resize(); });
 drawScene(LEVELS[0]);
-document.getElementById('pillrow').innerHTML = LEVELS.map((l,i) =>
-  `<span class="pill">${l.name.split('·')[0].trim()}</span>`).join('');
+document.getElementById('pillrow').innerHTML=LEVELS.map((l,i)=>`<span class="pill">${l.name.split('·')[0].trim()}</span>`).join('');
+renderScoreboard();
 </script>
 </body>
 </html>
